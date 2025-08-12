@@ -13,7 +13,6 @@ fi
 
 echo "<Programm compiled>"
 
-# Запуск в зависимости от аргумента
 MODE=$1
 
 if [ "$MODE" = "test" ]; then
