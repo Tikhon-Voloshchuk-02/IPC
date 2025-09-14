@@ -32,28 +32,33 @@ public class IODaten {
                 continue;
             }
 
-            if(auswahl==1){
+            if (auswahl == 1){
                 System.out.println("\n🟢 Starte manualle WP...\n");   
                 manuellVersion(IOscan);
                 System.out.println();
             }
-            else if(auswahl ==2){
+            else if (auswahl == 2){
                 System.out.println("\n🟢 Starte MVP-Modus...\n");   
                 handleMVP(IOscan);
                 System.out.println();
             }
-            else if(auswahl ==3){
+            else if (auswahl == 3){
                 System.out.println("\n🟢 Starte Borse-Modus...\n");   
                 handleBorse(IOscan);
                 System.out.println();
             }
-            else if(auswahl ==4){
+            else if (auswahl == 4){
                 System.out.println("\n📜 Starte Help-Mod...\n");   
                 printHelp();
                 System.out.println();
+                System.out.println("tapp 1 -> continue");
+                int tapp = IOscan.nextInt();
+                IOscan.nextLine();
+
+                if (tapp==1){ continue; }
             } 
  
-            else if(auswahl ==5){
+            else if (auswahl == 5){
                 System.out.println("Programm beendet"); 
                 break;
             }
@@ -80,7 +85,8 @@ public class IODaten {
         for (int i = 0; i<n; i++ ){
             System.out.print("Name: ");
             String name = IOscan.nextLine();
-            Wertpapier wpr = new Wertpapier(name);
+
+            Wertpapier wpr = new Wertpapier(name); //LIST
 
             System.out.print("Erwartungswert: ");
             double nu = IOscan.nextDouble();
@@ -107,9 +113,9 @@ public class IODaten {
     public static CovarianzMatrix IOCovarianz(int n, Scanner IOscan, List<Wertpapier> wertpapierList) {
         CovarianzMatrix cov = new CovarianzMatrix(n);
         System.out.println("---Covarianz schreiben---");
-        for(int i=0;i<n;i++){
-            for(int j=i;j<n;j++){
-                double value=wertpapierList.get(i).getVarianz();
+        for (int i=0; i<n; i++){
+            for (int j=i; j<n; j++){
+                double value = wertpapierList.get(i).getVarianz();
 
                 if(i==j){
                     System.out.println("Varianz einschreiben "+ (i+1)+" = "+value+ " (autocomplete) ");
@@ -133,7 +139,7 @@ public class IODaten {
         final double Rf = 0.02;
 
         ArrayList <Wertpapier> wertpapierList = new ArrayList<>();
-        Portfolio port = new Portfolio();
+        //Portfolio port = new Portfolio();
     
 //Daten eingabe        
    
@@ -157,12 +163,12 @@ public class IODaten {
 //Erwartungswert
             System.out.print("Erwartungswert: "); 
             double nu=0.0;
-            while(true) {
-                if(IOscan.hasNextDouble()){
+            while (true) {
+                if ( IOscan.hasNextDouble() ){
                     nu = IOscan.nextDouble(); 
                     break;
                 }
-                else{
+                else {
                     System.out.println("Error");
                     IOscan.next();
                 }
@@ -201,12 +207,12 @@ public class IODaten {
 
         for (Wertpapier i : wertpapierList) {
             double varianz = i.getVarianz();
-            double sigma = port.stdAbweichung(varianz);
-            System.out.printf( "%-10s %-10.4f %-10.4f %-10.4f %-10.4f\n",
+            //double sigma = port.stdAbweichung(varianz);
+            System.out.printf( "%-10s %-10.4f %-10.4f %-10.4f\n",
                 i.getName(),
                 i.getNu(),
                 varianz,
-                sigma, 
+               // sigma, 
                 i.getW() );
         }
 /*
@@ -218,25 +224,8 @@ public class IODaten {
         }
 */
 
-//Gesamte Daten ausgeben
-/*
-        System.out.println("\n╔══════════════════════════════════════════════╗");
-          System.out.println("║                   Portfolio-Ergebnis         ║");
-          System.out.println("╠══════════════════════════════════════════════╣");
-          PortfolioN p = new PortfolioN(wertpapierList, gewichte, matrix);
-
-        double nu_p=p.calculateNu();
-        double varianz_p=p.calculateVarianz();
-        double stdab_p=p.calculateStdab();
-        double SP_p=p.calculateSP(Rf);
-        double E_p=p.calculateE();
-        System.out.printf (  "║ %-30s : %11.4f ║\n", "Erwartete Rendite  (μ)", nu_p);
-        System.out.printf (  "║ %-30s : %11.4f ║\n", "Varianz               (σ²)", varianz_p);
-        System.out.printf (  "║ %-30s : %11.4f ║\n", "Standardabweichung   (σ)", stdab_p);
-        System.out.printf (  "║ %-30s : %11.4f ║\n", "Nutzenfunktion       E(u)", E_p);
-        System.out.printf (  "║ %-30s : %11.4f ║\n", "Sharpe Ratio", SP_p);
-        System.out.println("╚══════════════════════════════════════════════╝");
- */      
+        //Berechnet eine Kombinationen vom WP mit STEP
+        
         List<PortfolioN> combination = PortfolioN.generatePortfolios(wertpapierList, matrix, 0.1);
 
         PortfolioN best = null;
@@ -257,10 +246,12 @@ public class IODaten {
 
         System.out.println();
         System.out.println("Anzahl der Combinationen: "+N);
+        System.out.println("Risikolose Zinssatz: Rf="+Rf*100+"%");
         System.out.println();
         System.out.println("╔════════════════════════════════════════════════════╗");
         System.out.println("║         * Bestes Portfolio nach Sharpe (SP)        ║");
         System.out.println("╠════════════════════════════════════════════════════╣");
+
         if (best != null) { System.out.println(best); }
 }
 
@@ -340,7 +331,7 @@ public class IODaten {
 
             Wertpapier wp = createWertpapierFromAPI(ticker, borse, 10);
 
-            if(wp != null){
+            if (wp != null){
                 wpList.add(wp);
                 System.out.printf("✅ %s hinzugefügt.\n", wp.getName());
             }
@@ -387,6 +378,7 @@ public class IODaten {
         System.out.println("║   Asset-Gewichte – Anteil jedes Assets am Portfolio                ║");
         System.out.println("╚════════════════════════════════════════════════════════════════════╝");
     }
+
     public static void printSplash() {
         System.out.println("╔════════════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                                    ║");
