@@ -133,13 +133,13 @@ public class IODaten {
     }
 
 //N-wertpapiere Bearbeitung
+
     public static void manuellVersion(Scanner IOscan){
 
         System.out.println("----IPC-Start----");     
         final double Rf = 0.02;
 
         ArrayList <Wertpapier> wertpapierList = new ArrayList<>();
-        //Portfolio port = new Portfolio();
     
 //Daten eingabe        
    
@@ -207,24 +207,14 @@ public class IODaten {
 
         for (Wertpapier i : wertpapierList) {
             double varianz = i.getVarianz();
-            //double sigma = port.stdAbweichung(varianz);
             System.out.printf( "%-10s %-10.4f %-10.4f %-10.4f\n",
                 i.getName(),
                 i.getNu(),
                 varianz,
-               // sigma, 
                 i.getW() );
         }
-/*
-//Gewichte von wertpapier
-        double[] gewichte = new double[n];
-        for (int i = 0; i < wertpapierList.size(); i++) {
-            gewichte[i] = wertpapierList.get(i).getW();
-            wertpapierList.get(i).setW(gewichte[i]);
-        }
-*/
 
-        //Berechnet eine Kombinationen vom WP mit STEP
+//Berechnet eine Kombinationen vom WP mit STEP
         
         List<PortfolioN> combination = PortfolioN.generatePortfolios(wertpapierList, matrix, 0.1);
 
@@ -254,34 +244,6 @@ public class IODaten {
 
         if (best != null) { System.out.println(best); }
 }
-
-/*
-    public static void inputGewichtManuell(Scanner IOscan, Wertpapier wp,List<Wertpapier> wp){
-        
-        double gewichtSum=0.0;
-        System.out.print("Gewicht in Portfolio: "); 
-        double w = 0.0;
-        double maxW = 1.0-gewichtSum;
-        while(true) {
-            if(IOscan.hasNextDouble()){
-                w=IOscan.nextDouble();
-                IOscan.nextLine();
-
-                if(w>=0.0 && w<=maxW + epsilon) { break; }
-                else { System.out.printf("Warnung: w=%.3f ist unkorrekt (max erlaubt: %.3f)\n", w, maxW); }
-            }
-            else {
-                System.out.println("Error");
-                IOscan.next();
-            }
-        }
-        wp.setW(w);
-        IOscan.nextLine();
-        wertpapierList.add(wp);
-        gewichtSum+=w;
-        System.out.println("Akt summe: "+gewichtSum);
-    }
-*/
 
     public static Wertpapier createWertpapierFromAPI(String ticker, String Borseid ,int tage){
 
@@ -340,13 +302,71 @@ public class IODaten {
                 i--;
             }
         }
+
         System.out.println("\nAlle Wertpapiere:");
+        System.out.println("╔════════════════════════════════════════════╗");
+        System.out.println("║             📊 Alle Wertpapiere            ║");
+        System.out.println("╠════════════════════════════════════════════╣");
+        System.out.printf ("║ %-10s │ μ: %-8.4f│ σ²: %-8.4f     ║\n",
+                           "Name", 0.0, 0.0); 
+        System.out.println("╟────────────┼────────────┼──────────────────╢");
+
         for (Wertpapier wp : wpList) {
-            System.out.printf(" - %s | μ: %.4f | σ²: %.4f\n", 
-                                                            wp.getName(), 
-                                                            wp.getNu(), 
-                                                            wp.getVarianz() );
+        System.out.printf("║ %-10s │ %-10.4f │ %-11.4f      ║\n",
+                      wp.getName(), wp.getNu(), wp.getVarianz());
         }
+        System.out.println("╚════════════════════════════════════════════╝");
+        
+// Diese Daten bearbeiten
+
+        final double Rf = 0.02;
+ 
+        CovarianzMatrix matrix = IOCovarianz(n, IOscan, wpList );
+        System.out.println("Wertpapiere - insgesamt: "+n);
+        System.out.println();
+
+       
+        List<PortfolioN> combination = PortfolioN.generatePortfolios(wpList, matrix, 0.1);
+
+        PortfolioN best = null;
+        double bestSP = -1000.0;
+        int N = combination.size();
+
+        for (PortfolioN P: combination){
+            System.out.println(P);
+
+            double SP = P.calculateSP(Rf);
+
+            if (Double.isFinite(SP) && SP > bestSP){
+
+                bestSP = SP;
+                best = P;
+            }
+        }
+
+        System.out.println("\nAlle Wertpapiere:");
+        System.out.println("╔════════════════════════════════════════════╗");
+        System.out.println("║             📊 Alle Wertpapiere            ║");
+        System.out.println("╠════════════════════════════════════════════╣");
+        System.out.printf ("║ %-10s │ μ: %-8.4f│ σ²: %-8.4f     ║\n",
+                           "Name", 0.0, 0.0); 
+        System.out.println("╟────────────┼────────────┼──────────────────╢");
+
+        for (Wertpapier wp : wpList) {
+        System.out.printf("║ %-10s │ %-10.4f │ %-11.4f      ║\n",
+                      wp.getName(), wp.getNu(), wp.getVarianz());
+        }
+        System.out.println("╚════════════════════════════════════════════╝");
+        
+        System.out.println();
+        System.out.println("Anzahl der Combinationen: "+N);
+        System.out.println("Risikolose Zinssatz: Rf="+Rf*100+"%");
+        System.out.println();
+        System.out.println("╔════════════════════════════════════════════════════╗");
+        System.out.println("║         * Bestes Portfolio nach Sharpe (SP)        ║");
+        System.out.println("╠════════════════════════════════════════════════════╣");
+
+        if (best != null) { System.out.println(best); }
 
     }
 
@@ -389,7 +409,7 @@ public class IODaten {
         System.out.println("║   ██║             ██║                     ╚██████╔╝                ║");
         System.out.println("║   ╚═╝             ╚═╝                      ╚═════╝                 ║");
         System.out.println("║                                                                    ║");
-        System.out.println("║   📊 INVESTMENT PORTFOLIO CALCULATOR (IPC)     Version 1.0         ║");
+        System.out.println("║   📊 INVESTMENT PORTFOLIO CALCULATOR (IPC)     Version 1.1         ║");
         System.out.println("║                                                                    ║");
         System.out.println("╚════════════════════════════════════════════════════════════════════╝");
         System.out.println();
